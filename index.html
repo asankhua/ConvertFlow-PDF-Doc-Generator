@@ -18,8 +18,8 @@ import {
   Moon,
   Palette,
   GripVertical,
-  Layers,
-  ShieldCheck
+  List,
+  Shield
 } from 'lucide-react';
 
 // Thread yielder to prevent UI freezing on heavy files
@@ -517,7 +517,7 @@ const App = () => {
             }`}>
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2 text-sm font-medium">
-                  <Layers size={18} className={ac.mainText} />
+                  <List size={18} className={ac.mainText} />
                   <span>Queue</span>
                 </div>
                 <div className={`px-3 py-1 rounded-full text-xs font-bold ${files.length > 0 ? ac.mainText + ' ' + ac.lightBg : 'bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-300'}`}>
@@ -528,7 +528,7 @@ const App = () => {
               <div className={`flex items-center gap-2 text-xs font-medium px-4 py-3 rounded-2xl mb-6 ${
                 isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600'
               }`}>
-                <ShieldCheck size={16} /> Data processed locally
+                <Shield size={16} /> Data processed locally
               </div>
 
               <button 
