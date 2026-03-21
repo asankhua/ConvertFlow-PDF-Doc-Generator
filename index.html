@@ -381,13 +381,17 @@
               
               // Compress image for PDF with quality settings
               const qualitySettings = {
-                low: { max: 800, quality: 0.6 },
-                medium: { max: 1200, quality: 0.85 },
-                high: { max: 1600, quality: 0.95 }
+                low: { max: 600, quality: 0.4 },
+                medium: { max: 1000, quality: 0.7 },
+                high: { max: 1400, quality: 0.9 }
               };
               const qSettings = qualitySettings[settings.imageQuality];
+              console.log(`Compressing with quality: ${settings.imageQuality}, max: ${qSettings.max}, quality: ${qSettings.quality}`);
+              
               const compressedBlob = await compressImage(img, Math.max(dW * 2, qSettings.max), Math.max(dH * 2, qSettings.max), qSettings.quality);
               const compressedUrl = URL.createObjectURL(compressedBlob);
+              
+              console.log(`Original size: ${img.width}x${img.height}, Compressed blob size: ${(compressedBlob.size / 1024 / 1024).toFixed(2)}MB`);
               
               doc.addImage(compressedUrl, 'JPEG', (pageWidth - dW) / 2, (pageHeight - dH) / 2, dW, dH);
               URL.revokeObjectURL(compressedUrl); // Clean up
@@ -599,9 +603,9 @@
                       <label className="text-[10px] font-black uppercase tracking-[0.15em] opacity-60 block mb-3">3. Image Quality</label>
                       <div className="grid grid-cols-3 gap-2">
                         {[
-                          { id: 'low', label: 'Low', desc: 'Smallest file' },
-                          { id: 'medium', label: 'Medium', desc: 'Balanced' },
-                          { id: 'high', label: 'High', desc: 'Best quality' }
+                          { id: 'low', label: 'Low', desc: 'Smallest file', size: '~1-3MB' },
+                          { id: 'medium', label: 'Medium', desc: 'Balanced', size: '~3-6MB' },
+                          { id: 'high', label: 'High', desc: 'Best quality', size: '~5-10MB' }
                         ].map((q) => (
                           <button 
                             key={q.id}
@@ -614,9 +618,11 @@
                           >
                             <span className="text-[10px] font-bold tracking-wide text-center">{q.label}</span>
                             <span className="text-[8px] opacity-60 text-center">{q.desc}</span>
+                            <span className="text-[7px] opacity-40 text-center">{q.size}</span>
                           </button>
                         ))}
                       </div>
+                      <p className="text-[8px] opacity-50 mt-2 text-center">Lower quality = smaller file size</p>
                     </div>
                   </div>
                 </div>
