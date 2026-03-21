@@ -102,7 +102,8 @@
       const [settings, setSettings] = useState({
         outputFormat: 'pdf',
         orientation: 'p',
-        format: 'a4'
+        format: 'a4',
+        imageQuality: 'medium' // Add image quality setting
       });
       
       const fileInputRef = useRef(null);
@@ -168,6 +169,30 @@
         dragItem.current = null;
         dragOverItem.current = null;
         setFiles(_files);
+      };
+
+      const compressImage = async (imageElement, maxWidth, maxHeight, quality = 0.8) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Calculate new dimensions
+        let { width, height } = imageElement;
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        
+        if (ratio < 1) {
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress
+        ctx.drawImage(imageElement, 0, 0, width, height);
+        
+        return new Promise((resolve) => {
+          canvas.toBlob(resolve, 'image/jpeg', quality);
+        });
       };
 
       const processDocxToText = async (file) => {
@@ -342,6 +367,7 @@
                 image.src = item.preview;
               });
               
+              // Calculate optimal display dimensions
               const imgRatio = img.width / img.height;
               const pageRatio = contentWidth / (pageHeight - (margin * 2));
               let dW, dH;
@@ -352,7 +378,19 @@
                 dH = pageHeight - (margin * 2);
                 dW = dH * imgRatio;
               }
-              doc.addImage(img, 'JPEG', (pageWidth - dW) / 2, (pageHeight - dH) / 2, dW, dH);
+              
+              // Compress image for PDF with quality settings
+              const qualitySettings = {
+                low: { max: 800, quality: 0.6 },
+                medium: { max: 1200, quality: 0.85 },
+                high: { max: 1600, quality: 0.95 }
+              };
+              const qSettings = qualitySettings[settings.imageQuality];
+              const compressedBlob = await compressImage(img, Math.max(dW * 2, qSettings.max), Math.max(dH * 2, qSettings.max), qSettings.quality);
+              const compressedUrl = URL.createObjectURL(compressedBlob);
+              
+              doc.addImage(compressedUrl, 'JPEG', (pageWidth - dW) / 2, (pageHeight - dH) / 2, dW, dH);
+              URL.revokeObjectURL(compressedUrl); // Clean up
             } catch (err) {
               doc.setFontSize(10);
               doc.setTextColor(239, 68, 68);
@@ -551,6 +589,31 @@
                           >
                             <div className={`${o === 'p' ? 'w-4 h-6' : 'w-6 h-4'} border-[1.5px] border-current rounded-sm`}></div>
                             <span className="text-[11px] font-bold tracking-wide text-center">{o === 'p' ? 'Portrait' : 'Landscape'}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Image Quality Selector */}
+                    <div>
+                      <label className="text-[10px] font-black uppercase tracking-[0.15em] opacity-60 block mb-3">3. Image Quality</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { id: 'low', label: 'Low', desc: 'Smallest file' },
+                          { id: 'medium', label: 'Medium', desc: 'Balanced' },
+                          { id: 'high', label: 'High', desc: 'Best quality' }
+                        ].map((q) => (
+                          <button 
+                            key={q.id}
+                            onClick={() => setSettings(s => ({ ...s, imageQuality: q.id }))}
+                            className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl border-[1.5px] transition-all ${
+                              settings.imageQuality === q.id 
+                                ? `${ac.border} ${ac.lightBg} ${ac.mainText} dark:text-white dark:${ac.lightBg}`
+                                : isDark ? 'border-slate-600 text-slate-300 hover:border-slate-500 hover:text-white' : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                            }`}
+                          >
+                            <span className="text-[10px] font-bold tracking-wide text-center">{q.label}</span>
+                            <span className="text-[8px] opacity-60 text-center">{q.desc}</span>
                           </button>
                         ))}
                       </div>
