@@ -18,6 +18,7 @@ A powerful client-side document conversion tool that transforms multiple file fo
 ### 🎯 Core Capabilities
 - **Multi-format Conversion**: Convert various file types to PDF or DOCX
 - **PDF Merging**: Combine multiple PDFs into a single document
+- **Smart Image Compression**: 3 quality levels (Low/Medium/High) to optimize file sizes
 - **Drag & Drop Interface**: Intuitive file management
 - **File Reordering**: Drag handles to arrange files before conversion
 - **Theme Customization**: Dark/Light modes with 5 accent color themes
@@ -28,6 +29,7 @@ A powerful client-side document conversion tool that transforms multiple file fo
 ### 🎨 User Experience
 - **Responsive Design**: Works seamlessly on desktop and mobile
 - **Real-time Progress**: Detailed progress indicators during conversion
+- **Image Quality Control**: Choose between file size and image quality
 - **Error Handling**: Graceful error messages with specific feedback
 - **Modern UI**: Clean, professional interface with smooth animations
 - **Accessibility**: ARIA labels and keyboard navigation support
@@ -69,9 +71,17 @@ A powerful client-side document conversion tool that transforms multiple file fo
 
 1. **Visit**: [ConvertFlow Live Demo](https://asankhua.github.io/ConvertFlow-PDF-Doc-Generator/)
 2. **Upload Files**: Drag & drop or click to select files
-3. **Configure**: Choose output format and page orientation
+3. **Configure**: Choose output format, page orientation, and image quality
 4. **Convert**: Click generate button to create unified document
 5. **Download**: Automatic download of converted document
+
+## 📋 Image Quality Settings
+
+| Quality Level | Resolution | JPEG Quality | Expected PDF Size | Best For |
+|---------------|------------|--------------|-------------------|-----------|
+| **Low** | 600px | 40% | ~1-3MB per image | Email, web sharing |
+| **Medium** | 1000px | 70% | ~3-6MB per image | General use, printing |
+| **High** | 1400px | 90% | ~5-10MB per image | High-quality printing |
 
 ## 🏗️ Architecture
 
@@ -110,6 +120,7 @@ A powerful client-side document conversion tool that transforms multiple file fo
 - **Output Format**: PDF or DOCX
 - **Page Orientation**: Portrait or Landscape
 - **Page Size**: A4 (default)
+- **Image Quality**: Low (smallest), Medium (balanced), High (best quality)
 
 ### Theme Options
 - **Dark/Light Mode**: Toggle between themes

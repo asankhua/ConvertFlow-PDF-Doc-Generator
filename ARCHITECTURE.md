@@ -88,12 +88,33 @@ const handleFiles = (newFiles) => {
 const processors = {
   'docx': processDocxToText,    // Mammoth.js
   'xlsx': processExcelToText,   // XLSX.js
-  'image': processImageToEmbed, // Canvas API
+  'image': processImageToCompress, // Canvas API + Compression
   'text': processTextContent    // File API
 };
 ```
 
-#### C. **Document Generation Layer**
+#### C. **Image Compression Pipeline**
+```javascript
+const compressImage = async (imageElement, maxWidth, maxHeight, quality) => {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Smart resizing to fit within max dimensions
+  const ratio = Math.min(maxWidth / width, maxHeight / height);
+  
+  // Compress to JPEG with specified quality
+  canvas.toBlob(resolve, 'image/jpeg', quality);
+};
+
+// Quality Settings
+const qualitySettings = {
+  low: { max: 600, quality: 0.4 },     // ~1-3MB per image
+  medium: { max: 1000, quality: 0.7 },  // ~3-6MB per image
+  high: { max: 1400, quality: 0.9 }     // ~5-10MB per image
+};
+```
+
+#### D. **Document Generation Layer**
 ```javascript
 // PDF Generation Pipeline
 const exportAsPDF = async () => {
@@ -144,6 +165,7 @@ const removeFile = (id) => {
 ```javascript
 const exportAsPDF = async () => {
   if (!window.jspdf) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  if (!window.mammoth) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth.js/1.4.9/mammoth.browser.min.js');
   // Continue with PDF generation
 };
 ```
@@ -159,10 +181,15 @@ Drag & Drop → File Reader → Metadata Extraction → Preview Generation → S
 
 ### 2. **Conversion Flow**
 ```
-Export Request → Format Validation → Library Loading → Content Processing → Document Assembly → Download
+Export Request → Format Validation → Library Loading → Content Processing → Image Compression → Document Assembly → Download
 ```
 
-### 3. **Error Handling Flow**
+### 3. **Image Compression Flow**
+```
+Image Load → Quality Selection → Canvas Resize → JPEG Compression → Size Optimization → PDF Embedding
+```
+
+### 4. **Error Handling Flow**
 ```
 Error Detection → State Update → User Notification → Recovery Options → Logging
 ```
@@ -245,7 +272,36 @@ const validateFile = (file) => {
 - **File Processing**: Variable based on file sizes
 - **Memory Cleanup**: Automatic after file removal
 
-## 🔧 Library Integration Architecture
+## �️ Image Compression System
+
+### 1. **Compression Algorithm**
+```javascript
+const compressImage = async (imageElement, maxWidth, maxHeight, quality) => {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Calculate optimal dimensions
+  const ratio = Math.min(maxWidth / width, maxHeight / height);
+  
+  // Resize and compress to JPEG
+  canvas.toBlob(resolve, 'image/jpeg', quality);
+};
+```
+
+### 2. **Quality Presets**
+| Level | Max Resolution | JPEG Quality | Expected Size | Use Case |
+|-------|----------------|--------------|---------------|----------|
+| Low | 600px | 40% | ~1-3MB | Email, web sharing |
+| Medium | 1000px | 70% | ~3-6MB | General use |
+| High | 1400px | 90% | ~5-10MB | High-quality printing |
+
+### 3. **Performance Optimizations**
+- **Canvas-based processing** for efficient resizing
+- **JPEG compression** for optimal size/quality balance
+- **Memory cleanup** with URL.revokeObjectURL()
+- **Thread yielding** to prevent UI freezing
+
+## �🔧 Library Integration Architecture
 
 ### 1. **PDF Processing (jsPDF)**
 ```javascript
